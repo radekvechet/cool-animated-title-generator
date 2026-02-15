@@ -6,20 +6,55 @@ import CodeExporter from './components/CodeExporter';
 import { AppState } from './types';
 import { INITIAL_APP_STATE } from './constants';
 
+const STORAGE_KEY = 'cool-title-generator-state-v1';
+
+const loadSavedState = (): AppState => {
+  if (typeof window === 'undefined') return INITIAL_APP_STATE;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return INITIAL_APP_STATE;
+  try {
+    const parsed = JSON.parse(saved);
+    // Merge with initial state to handle any schema updates and reset transient states
+    return { 
+      ...INITIAL_APP_STATE, 
+      ...parsed, 
+      isFullscreen: false // Always start windowed for better UX
+    };
+  } catch (e) {
+    console.error("Failed to load state from local storage", e);
+    return INITIAL_APP_STATE;
+  }
+};
+
 const App: React.FC = () => {
-  const [state, setState] = useState<AppState>(INITIAL_APP_STATE);
+  const [state, setState] = useState<AppState>(loadSavedState);
+
+  // Persistence effect: save to local storage whenever state changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
   const handleStateChange = (updates: Partial<AppState>) => {
     setState(prev => ({ ...prev, ...updates }));
   };
 
-  // Keyboard shortcut to exit fullscreen
+  // Keyboard shortcut to exit/toggle fullscreen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if the user is typing in an input or textarea
+      const isTyping = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      if (isTyping) return;
+
       if (e.key === 'Escape' && state.isFullscreen) {
         handleStateChange({ isFullscreen: false });
       }
+      
+      // Toggle fullscreen with 'f'
+      if (e.key.toLowerCase() === 'f') {
+        handleStateChange({ isFullscreen: !state.isFullscreen });
+      }
     };
+    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [state.isFullscreen]);
@@ -31,21 +66,13 @@ const App: React.FC = () => {
       {!state.isFullscreen && (
         <div className="bg-gray-950 flex items-center justify-between px-6 py-4 border-b border-gray-900 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-600 shadow-lg shadow-blue-500/20 animate-pulse flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
               <span className="font-extrabold tracking-tight text-base block leading-none">Cool Title Gen</span>
-              
-            </div>
           </div>
           <div className="flex items-center gap-6">
             <a 
-              href="https://github.com" 
+              href="https://github.com/radekvechet/cool-animated-title-generator" 
               target="_blank" 
-              rel="noopener noreferrer"
+              title="Github repo"
               className="text-xs font-bold text-gray-500 hover:text-white transition-colors flex items-center gap-2 group"
             >
               <span>GitHub</span>
