@@ -77,13 +77,8 @@ const App: React.FC = () => {
         <footer className="bg-gray-950 border-t border-gray-900 py-6 px-6 text-center animate-in fade-in duration-700">
           <div className="flex flex-col items-center gap-3">
             <p className="text-[10px] text-gray-600 uppercase tracking-[0.3em] font-black">
-              Crafted with Precision for Modern Web Experiences
+              Radek Věchet
             </p>
-            <div className="flex items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-              <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-blue-500"/> Tailwind CSS</span>
-              <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-purple-500"/> React 19</span>
-              <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-500"/> Gemini AI</span>
-            </div>
           </div>
         </footer>
       )}
