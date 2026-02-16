@@ -14,11 +14,10 @@ const loadSavedState = (): AppState => {
   if (!saved) return INITIAL_APP_STATE;
   try {
     const parsed = JSON.parse(saved);
-    // Merge with initial state to handle any schema updates and reset transient states
     return { 
       ...INITIAL_APP_STATE, 
       ...parsed, 
-      isFullscreen: false // Always start windowed for better UX
+      isFullscreen: false
     };
   } catch (e) {
     console.error("Failed to load state from local storage", e);
@@ -28,6 +27,13 @@ const loadSavedState = (): AppState => {
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(loadSavedState);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setIsLoaded(true);
+    });
+  }, []);
 
   // Persistence effect: save to local storage whenever state changes
   useEffect(() => {
@@ -60,13 +66,13 @@ const App: React.FC = () => {
   }, [state.isFullscreen]);
 
   return (
-    <div className={`flex flex-col min-h-screen bg-gray-950 text-gray-100 selection:bg-blue-500/30 transition-colors duration-500 ${state.isFullscreen ? 'bg-black' : ''}`}>
+    <div className={`flex flex-col min-h-screen bg-gray-950 text-gray-100 selection:bg-blue-500/30 transition-colors duration-500 ${state.isFullscreen ? 'bg-black' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`} style={{ transition: 'opacity 1s ease-out' }}>
       
       {/* Header / Brand - Hidden in Fullscreen */}
       {!state.isFullscreen && (
         <div className="bg-gray-950 flex items-center justify-between px-6 py-4 border-b border-gray-900 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-3">
-              <span className="font-extrabold tracking-tight text-base block leading-none">Cool Title Gen</span>
+              <span className={`font-extrabold tracking-tight text-base block leading-none transition-all duration-1000 ${isLoaded ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}>Cool Title Gen</span>
           </div>
           <div className="flex items-center gap-6">
             <a 
